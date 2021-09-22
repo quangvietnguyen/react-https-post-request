@@ -19,16 +19,27 @@ function App() {
       }
 
       const data = await response.json();
+      
+      const loadedMovies = [];
 
-      const transformedMovies = data.results.map((movieData) => {
-        return {
-          id: movieData.episode_id,
-          title: movieData.title,
-          openingText: movieData.opening_crawl,
-          releaseDate: movieData.release_date,
-        };
-      });
-      setMovies(transformedMovies);
+      for (const key in data) {
+        loadedMovies.push({
+          id: key,
+          title: data[key].title,
+          openingText: data[key].openingText,
+          releaseDate: data[key].releaseDate
+        });
+      }
+
+      // const transformedMovies = data.movies.map((movieData) => {
+      //   return {
+      //     id: movieData.episode_id,
+      //     title: movieData.title,
+      //     openingText: movieData.opening_crawl,
+      //     releaseDate: movieData.release_date,
+      //   };
+      // });
+      setMovies(loadedMovies);
     } catch (error) {
       setError(error.message);
     }
@@ -39,10 +50,21 @@ function App() {
     fetchMoviesHandler();
   }, [fetchMoviesHandler]);
 
-  function addMovieHandler(movie) {
-    fetch('https://react-http-45535-default-rtdb.firebaseio.com/movies.json', {
+  async function addMovieHandler(movie) {
+    const response = await fetch('https://react-http-45535-default-rtdb.firebaseio.com/movies.json', {
       method: 'POST',
       body: JSON.stringify(movie),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    const data = await response.json();
+    console.log(data)
+  }
+
+  async function deleteMoviesHandler(movie) {
+    const response = await fetch('https://react-http-45535-default-rtdb.firebaseio.com/movies.json', {
+      method: 'DELETE'
     });
   }
 
@@ -64,6 +86,9 @@ function App() {
     <React.Fragment>
       <section>
         <AddMovie onAddMovie={addMovieHandler} />
+      </section>
+      <section>
+        <button onClick={deleteMoviesHandler}>Delete Database</button>
       </section>
       <section>
         <button onClick={fetchMoviesHandler}>Fetch Movies</button>
